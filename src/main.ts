@@ -1,28 +1,38 @@
-import { signal, hiccup, serialize } from "./lib";
+import { signal, hiccup, serialize, reduce } from "./lib/index";
+import type { SubscribeFn } from "./lib";
 
-const [counter, setConter] = signal(0);
+const app = () => {
+  const [counter, setCounter] = signal(0);
+  const counter2x = reduce(counter, (x, _) => x * 2, ()=> 0);
 
-const tree = [
-  "div",
-  { id: "root", class: "pa4" },
-  [
+  return [
     "div",
-    {},
-    ["button", { onclick: () => setConter((prev) => prev - 1) }, "-"],
-    ["button", { onclick: () => setConter((prev) => prev + 1) }, "+"],
-  ],
-  ["div", {}, "count: ", counter],
-];
+    { id: "root", class: "pa4" },
+    // derive(ready, () => "Interactive!"),
+		// counter2x,
+		// counter,
+		// counter,
+    counter2x,
+    counter2x,
+    [
+      "div",
+      {},
+      ["button", { onclick: () => setCounter((prev) => prev - 1) }, "-"],
+      ["button", { onclick: () => setCounter((prev) => prev + 1) }, "+"],
+    ],
+    ["div", {}, "count: ", counter],
+  ];
+};
 
 // Simulate server side rendering.
-const app = () => document.querySelector<HTMLDivElement>("#root")!;
+const root = () => document.querySelector<HTMLDivElement>("#root")!;
 const tmp = document.createElement("div");
-tmp.innerHTML = serialize(tree);
+tmp.innerHTML = serialize(app());
 console.log(tmp.innerHTML);
-app().replaceWith(tmp.firstElementChild);
+root().replaceWith(tmp.firstElementChild);
 
 // Simulate hydration.
 setTimeout(() => {
-  app().replaceWith(hiccup(tree));
+  root().replaceWith(hiccup(app()));
   console.log("viola!");
 }, 3000);

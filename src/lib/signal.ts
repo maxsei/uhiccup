@@ -1,50 +1,33 @@
-// SubscribeFn takes in the previous and current state and returns a boolean
-// indicating if the subscriber function is done processing.
-export type SubscribeFn<T> = (prev: T, curr: T) => boolean;
-
-// NotifyFn takes the current state and transforms it into a new state.
-export type NotifyFn<T> = (prev: T) => T;
-
-// Comparator function to compare two values of type T.
-export type Comparator<T> = (a: T, b: T) => boolean;
+import type { Signal, Comparator } from "./api";
 
 /**
- * Signal represents a state container with subscription and notification capabilities.
+ * The `signal` function creates a state container with subscription
+ * capabilities.
  *
- * The Signal type is a tuple consisting of two functions:
+ * @param curr - The initial state of type T.
+ * @param cmp - (Optional) Comparator function to determine if the state has
+ * changed. Defaults to strict equality.
  *
- * 1. `subscribe`: A function to subscribe to state changes.
- *    - Takes a subscriber function `SubscribeFn<T>` as an argument.
- *    - Returns the current state of type `T`.
- *
- * 2. `notify`: A function to update the state and notify subscribers if the state has changed.
- *    - Takes a notification function `NotifyFn<T>` as an argument.
- *    - Does not return anything (`void`).
- *
- * @template T The type of the state managed by the signal.
- */
-export type Signal<T> = [(s: SubscribeFn<T>) => T, (f: NotifyFn<T>) => void];
-
-/**
- * The `signal` function creates a state container with subscription capabilities.
- *
- * @param state - The initial state of type T.
- * @param cmp - (Optional) Comparator function to determine if the state has changed. Defaults to strict equality.
  * @returns A Signal<T> tuple containing:
  *   - subscribe: A function to subscribe to state changes.
- *   - notify: A function to update the state and notify subscribers if the state has changed.
+ *   - notify: A function to update the state and notify subscribers if the
+ * state has changed.
  */
-export const signal = <T>(state: T, cmp?: Comparator<T>): Signal<T> => {
-  cmp = cmp ?? ((a, b) => a === b); // Default comparator using strict equality
-  let subs: SubscribeFn<T>[] = [];
+export const signal = <T>(curr: T, cmp?: Comparator<T>): Signal<T> => {
+  // Defaults comparator.
+  cmp = cmp ?? ((a, b) => a === b);
 
-  const subscribe = (sub: SubscribeFn<T>): T => (subs.push(sub), state);
+  // Add to subscribers on subscribe and return state.
+  let subs: Subscriber<T>[] = [];
+  const subscribe = (sub: Subscriber<T>): T => (subs.push(sub), curr);
 
-  const notify = (f: NotifyFn<T>) => {
-    const curr = f(state);
-    if (cmp(curr, state)) return; // No state change, do nothing
-    subs = subs.filter((s) => !s(state, curr)); // Notify subscribers and remove those that return true
-    state = curr; // Update the state
+  // Get next state, and if different notify subscribers, removing subscribers
+  // that return true, and update state.
+  const notify = (f: Transformer<T>) => {
+    const next = f(curr);
+    if (cmp(next, curr)) return;
+    subs = subs.filter((s) => !s(curr, next));
+    curr = next;
   };
 
   return [subscribe, notify];

@@ -1,7 +1,7 @@
-import { isStrOrNum } from "./is-str-or-num";
+import { isStrOrNum, isNil } from "./check";
 
 export const serialize = (tree: any): HTMLElement => {
-  if (tree === null) return "<!-- -->";
+  if (isNil(tree)) return "<!-- -->";
   // Reactive values.
   if (typeof tree === "function") {
     return serialize(tree((prev, curr) => false));

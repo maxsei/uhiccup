@@ -1,4 +1,4 @@
-import { isStrOrNum } from "./is-str-or-num";
+import { isStrOrNum, isNil } from "./check";
 
 /**
  * The `hiccup` function creates a DOM element tree from a given nested array structure.
@@ -7,7 +7,7 @@ import { isStrOrNum } from "./is-str-or-num";
  * @returns The root HTMLElement of the created DOM tree.
  */
 export const hiccup = (tree: any): HTMLElement => {
-  if (tree === null) return document.createComment("");
+  if (isNil(tree)) return document.createComment("");
   // Reactive values.
   if (typeof tree === "function") {
     let el: Element;

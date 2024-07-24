@@ -1,11 +1,13 @@
 # uhiccup
+
 A micro hiccup + signals based reactive dom library that can be serialized directly as html.
 
-
 ```typescript
-import { signal, hiccup, serialize } from "./lib";
+import { signal, hiccup, serialize, derive } from "./lib";
+import type { SubscribeFn } from "./lib";
 
-const [counter, setConter] = signal(0);
+const [counter, setCounter] = signal(0);
+const counter2x = derive(counter, (x) => x * 2);
 
 const tree = [
   "div",
@@ -13,9 +15,10 @@ const tree = [
   [
     "div",
     {},
-    ["button", { onclick: () => setConter((prev) => prev - 1) }, "-"],
-    ["button", { onclick: () => setConter((prev) => prev + 1) }, "+"],
+    ["button", { onclick: () => setCounter((prev) => prev - 1) }, "-"],
+    ["button", { onclick: () => setCounter((prev) => prev + 1) }, "+"],
   ],
+  counter2x,
   ["div", {}, "count: ", counter],
 ];
 
