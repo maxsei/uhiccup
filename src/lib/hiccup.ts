@@ -1,4 +1,4 @@
-import { isStrOrNum, isNil } from "./check";
+import { isScalar, isNil } from "./check";
 
 /**
  * The `hiccup` function creates a DOM element tree from a given nested array structure.
@@ -20,7 +20,7 @@ export const hiccup = (tree: any): HTMLElement => {
     );
     return el;
   }
-  if (typeof tree === "string" || typeof tree === "number") {
+  if (isScalar(tree)) {
     return document.createTextNode(tree.toString());
   }
   // Tree is array of [tag, attr, ...children]

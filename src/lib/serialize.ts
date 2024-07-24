@@ -1,4 +1,4 @@
-import { isStrOrNum, isNil } from "./check";
+import { isScalar, isNil } from "./check";
 
 export const serialize = (tree: any): HTMLElement => {
   if (isNil(tree)) return "<!-- -->";
@@ -6,14 +6,15 @@ export const serialize = (tree: any): HTMLElement => {
   if (typeof tree === "function") {
     return serialize(tree((prev, curr) => false));
   }
-  if (isStrOrNum(tree)) {
+  if (isScalar(tree)) {
     return htmlEscape(`${tree}`);
   }
   // Tree is array of [tag, attr, ...children]
   let [tag, attrs, ...children] = tree;
   tag = htmlEscape(tag);
   const attrsS = Object.entries(attrs)
-    .filter(([_, v]) => isStrOrNum(v))
+    // TODO: encode boolean and signals <23-07-24, Max Schulte> //
+    .filter(([_, v]) => isScalar(v))
     .map(([k, v]) => ` ${k}="${v}"`)
     .join("");
   if (!selfClosing.has(tag)) {
