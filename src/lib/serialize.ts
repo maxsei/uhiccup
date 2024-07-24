@@ -14,7 +14,7 @@ export const serialize = (tree: any): HTMLElement => {
   tag = htmlEscape(tag);
   const attrsS = Object.entries(attrs)
     .filter(([_, v]) => isStrOrNum(v))
-    .map(([k, v]) => ` "${k}"="${v}"`)
+    .map(([k, v]) => ` ${k}="${v}"`)
     .join("");
   if (!selfClosing.has(tag)) {
     const childrenS = children?.map(serialize).join("");
