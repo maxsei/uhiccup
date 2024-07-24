@@ -1,19 +1,16 @@
 import { signal, hiccup, serialize, reduce } from "./lib/index";
-import type { SubscribeFn } from "./lib";
+import type { Subscriber, Subscription } from "./lib";
+
+const map = <A, B>(s: Subscriber<A>, f: (A) => B) =>
+  reduce(s, f, (_, v) => f(v));
 
 const app = () => {
   const [counter, setCounter] = signal(0);
-  const counter2x = reduce(counter, (x, _) => x * 2, ()=> 0);
+  const [toggleSignal, toggle] = signal<void>();
 
   return [
     "div",
     { id: "root", class: "pa4" },
-    // derive(ready, () => "Interactive!"),
-		// counter2x,
-		// counter,
-		// counter,
-    counter2x,
-    counter2x,
     [
       "div",
       {},
@@ -21,6 +18,19 @@ const app = () => {
       ["button", { onclick: () => setCounter((prev) => prev + 1) }, "+"],
     ],
     ["div", {}, "count: ", counter],
+    ["div", {}, "count2x: ", map(counter, (x) => x * 2)],
+    [
+      "button",
+      {
+        onclick: () => toggle(() => {}),
+      },
+      "toggle: ",
+      reduce(
+        toggleSignal,
+        () => false,
+        (acc) => !acc,
+      ),
+    ],
   ];
 };
 
@@ -35,4 +45,4 @@ root().replaceWith(tmp.firstElementChild);
 setTimeout(() => {
   root().replaceWith(hiccup(app()));
   console.log("viola!");
-}, 3000);
+}, 0);

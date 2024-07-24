@@ -62,4 +62,4 @@ export type Comparator<T> = (a: T, b: T) => boolean;
 export type Signal<T> = [Subscription<T>, Transformer<T>];
 
 
-export type Reducer<A, B> = (cur: A, acc: B)=> B
+export type Reducer<A, B> = (acc: B, cur: A)=> B

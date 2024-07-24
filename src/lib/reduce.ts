@@ -1,21 +1,16 @@
-import type { Signal, Subscription, Reducer } from "./api";
+import type { Subscription, Reducer } from "./api";
+import { signal } from "./signal";
 
 export const reduce = <A, B>(
-  subscription: Subscription<A>,
+  subscribe: Subscription<A>,
+  init: (A) => B,
   reducer: Reducer<A, B>,
-  init: () => B,
 ): Subscription<B> => {
-  return (sub: Subscriber<B>) => {
-    let acc = init && init();
-    acc = reducer(
-      subscription((_, cur) => {
-        const next = reducer(cur, acc);
-        const done = sub(acc, next);
-        acc = next;
-        return done;
-      }),
-      acc,
-    );
-    return acc;
-  };
+  const [get, set] = signal<B>();
+  const cur = subscribe((_, cur) => {
+    set((acc) => reducer(acc, cur));
+    return false; // never unsubscribe
+  });
+  set(() => init?.(cur));
+  return get;
 };
