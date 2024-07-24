@@ -2,7 +2,6 @@ import { signal, hiccup, serialize } from "./lib";
 
 const [counter, setConter] = signal(0);
 
-const app = document.querySelector<HTMLDivElement>("#root")!;
 const tree = [
   "div",
   { id: "root", class: "pa4" },
@@ -16,11 +15,14 @@ const tree = [
 ];
 
 // Simulate server side rendering.
-app.innerHTML = serialize(tree);
-console.log(app.innerHTML);
+const app = () => document.querySelector<HTMLDivElement>("#root")!;
+const tmp = document.createElement("div");
+tmp.innerHTML = serialize(tree);
+console.log(tmp.innerHTML);
+app().replaceWith(tmp.firstElementChild);
 
 // Simulate hydration.
 setTimeout(() => {
-  app.replaceWith(hiccup(tree));
+  app().replaceWith(hiccup(tree));
   console.log("viola!");
 }, 3000);
